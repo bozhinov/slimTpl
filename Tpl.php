@@ -54,7 +54,7 @@ class Tpl {
      *
      * @return void, string: depending of the $toString
      */
-    public function draw($filePath) {
+    public function draw($filePath, $returnString = FALSE) {
 		
         extract($this->vars);
         ob_start();
@@ -66,7 +66,7 @@ class Tpl {
 		$fileTime = (int)@filemtime($filePath);
 		$fileTimeCached = (int)@filemtime($filePathCached);
 		
-		// For check templates are exists (although there are other reasons this to be false)
+		// Check if template exists (although there are other reasons for this to be false)
 		if ($fileTime == 0) {
 			die('Template ' . $fileName . ' not found!');
 		}
@@ -80,9 +80,14 @@ class Tpl {
         }
 		
 		require $filePathCached;
+		$output = ob_get_clean();
 
-        echo ob_get_clean();
-
+		if ($returnString){
+			return $output;
+		} else {
+			echo $output;
+		}
+        
     }
 
     /**
