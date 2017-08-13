@@ -184,7 +184,11 @@ class Parser {
 						}
 
 						//loop code
-						$parsedCode .= "<?php $counter=-1; $assignNewVar if( isset($newvar) && ( is_array($newvar) || $newvar instanceof Traversable ) && sizeof($newvar) ) foreach( $newvar as $key => $value ){ $counter++; ?>";
+						if (PHP_VERSION_ID > 70099) { # is_iterable avail since 7.1
+							$parsedCode .= "<?php $counter=-1; $assignNewVar if(is_iterable($newvar) && count($newvar)) foreach( $newvar as $key => $value ){ $counter++; ?>";
+						} else {
+							$parsedCode .= "<?php $counter=-1; $assignNewVar if((is_array($newvar) || $newvar instanceof Traversable) && count($newvar)) foreach( $newvar as $key => $value ){ $counter++; ?>";
+						}
 						break;
 					//close loop tag
 					case (preg_match($tagMatch['loop_close'], $html)):
@@ -222,10 +226,15 @@ class Parser {
 						$openIf--; //decrease if counter
 						$parsedCode .= '<?php } ?>'; // close if code
 						break;
+					//variables
+					case (preg_match($tagMatch['variable'], $html, $matches)):
+						//variables substitution (es. {$title})
+						$parsedCode .= "<?php " . $this->varReplace($matches[1], TRUE, TRUE) . "; ?>";
+						break;
 					// autoescape off
 					case (preg_match($tagMatch['autoescape'], $html, $matches)):
 						$auto_escape_old = $this->config['auto_escape'];
-						$this->config['auto_escape'] = (in_array($matches[1], array('off','false','0',NULL))) ? FALSE : TRUE;
+						$this->config['auto_escape'] = (in_array($matches[1], array('off','false','0', NULL))) ? FALSE : TRUE;
 						break;
 					// autoescape on
 					case (preg_match($tagMatch['autoescape_close'], $html, $matches)):
@@ -233,17 +242,11 @@ class Parser {
 						break;
 					// function
 					case (preg_match($tagMatch['function'], $html, $matches)):
-						$parsedFunction = $matches[1] . ((isset($matches[2])) ? $this->varReplace($matches[2], FALSE) : "()");
-						$parsedCode .= "<?php echo $parsedFunction; ?>"; // function
+						$parsedCode .= "<?php echo ".$matches[1] . (isset($matches[2]) ? $this->varReplace($matches[2], FALSE) : "()")."; ?>"; // function
 						break;
 					//ternary
 					case (preg_match($tagMatch['ternary'], $html, $matches)):
 						$parsedCode .= "<?php echo " . '(' . $this->varReplace($matches[1]) . '?' . $this->varReplace($matches[2]) . ':' . $this->varReplace($matches[3]) . ')' . "; ?>";
-						break;
-					//variables
-					case (preg_match($tagMatch['variable'], $html, $matches)):
-						//variables substitution (es. {$title})
-						$parsedCode .= "<?php " . $this->varReplace($matches[1], TRUE, TRUE) . "; ?>";
 						break;
 					//constants
 					case (preg_match($tagMatch['constant'], $html, $matches)):
@@ -270,7 +273,7 @@ class Parser {
 		$parsedCode = "<?php if(!class_exists('Rain\Tpl')){exit;}?>" . $parsedCode;
 
 		// fix the php-eating-newline-after-closing-tag-problem
-		$parsedCode = str_replace("?>\n", "?>\n\n", $parsedCode);
+		#$parsedCode = str_replace("?\>\n", "?\>\n\n", $parsedCode);
 				
 		return $parsedCode;
     }
@@ -278,7 +281,7 @@ class Parser {
     protected function varReplace($html, $escape = TRUE, $echo = FALSE) {
 
 		// change variable name if loop level
-		$html = preg_replace(array('/(\$key)\b/', '/(\$value)\b/', '/(\$counter)\b/'), array('${1}' . $this->loopLevel, '${1}' . $this->loopLevel, '${1}' . $this->loopLevel), $html);
+		$html = preg_replace(['/(\$key)\b/', '/(\$value)\b/', '/(\$counter)\b/'], ['${1}' . $this->loopLevel, '${1}' . $this->loopLevel, '${1}' . $this->loopLevel], $html);
 
 		// if it is a variable
 		if (preg_match_all('/(\$[a-z_A-Z][^\s]*)/', $html, $matches)) {
@@ -286,7 +289,7 @@ class Parser {
 			for ($i = 0; $i < count($matches[1]); $i++) {
 
 				$rep = preg_replace('/\[(\${0,1}[a-zA-Z_0-9]*)\]/', '["$1"]', $matches[1][$i]);
-				$rep = preg_replace( '/\.(\${0,1}[a-zA-Z_0-9]*(?![a-zA-Z_0-9]*(\'|\")))/', '["$1"]', $rep );
+				$rep = preg_replace('/\.(\${0,1}[a-zA-Z_0-9]*(?![a-zA-Z_0-9]*(\'|\")))/', '["$1"]', $rep);
 				$html = str_replace($matches[0][$i], $rep, $html);
 			}
 
@@ -297,12 +300,8 @@ class Parser {
 			if (!preg_match('/\$.*=.*/', $html)) {
 
 				// escape character
-				if ($this->config['auto_escape'] && $escape)
-					$html = "htmlspecialchars( $html, ENT_COMPAT, '" . $this->config['charset'] . "', FALSE )";
-				
-				if ($echo){
-					$html = "echo ".$html;
-				}
+				($this->config['auto_escape'] && $escape) AND $html = "htmlspecialchars($html, ENT_COMPAT, '" . $this->config['charset'] . "', FALSE)";
+				($echo) AND $html = "echo ".$html;
 			}
 		}
 
