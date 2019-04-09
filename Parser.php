@@ -56,8 +56,9 @@ class Parser {
 		'variable' => ['({\$.*?})', '/{(\$.*?)}/'],
 		'constant' => ['({#.*?})', '/{#(.*?)#{0,1}}/'],
 	);
-	
-	function __construct($config){
+
+	function __construct($config)
+	{
 		$this->config = $config;
 	}
 
@@ -67,11 +68,11 @@ class Parser {
 	* @param string $filePath: full path to the template to be compiled
 	*
 	*/
-	public function compileFile($filePath) {
-		
+	public function compileFile($filePath)
+	{
 		// read the template
 		$code = file_get_contents($filePath);
-		
+
 		// xml substitution
 		$code = preg_replace("/<\?xml(.*?)\?>/s", /*<?*/ "##XML\\1XML##", $code);
 
@@ -79,7 +80,7 @@ class Parser {
 		$code = preg_replace_callback("/##XML(.*?)XML##/s", function($match) {
 				return "<?php echo '<?xml " . stripslashes($match[1]) . " ?>'; ?>";
 			}, $code);
-					
+
 		// set tags
 		$tagSplit = [];
 		$tagMatch = [];
@@ -108,15 +109,14 @@ class Parser {
 
 			//read all parsed code
 			foreach ($codeSplit as $html) {
-				
-								
+
 				switch(true){
 					//close ignore tag
-					case (!$commentIsOpen && preg_match($tagMatch['ignore_close'], $html)): 
+					case (!$commentIsOpen && preg_match($tagMatch['ignore_close'], $html)):
 						$ignoreIsOpen = FALSE;
 						break;
 					//code between tag ignore id deleted
-					case ($ignoreIsOpen): 
+					case ($ignoreIsOpen):
 						break;
 					//close no parse tag
 					case (preg_match($tagMatch['noparse_close'], $html)):
@@ -125,7 +125,7 @@ class Parser {
 					//code between tag noparse is not compiled
 					case ($commentIsOpen):
 						$parsedCode .= $html;
-						break;	
+						break;
 					//ignore
 					case (preg_match($tagMatch['ignore'], $html)):
 						$ignoreIsOpen = TRUE;
@@ -142,10 +142,9 @@ class Parser {
 						while(preg_match('#\w+\.\./#', $matches[1])) {
 							$matches[1] = preg_replace('#\w+/\.\./#', '', $matches[1]);
 						}
-										
 						// parse
 						$includeTemplate = $this->varReplace($matches[1]);
-						
+
 						//dynamic include
 						if ((strpos($matches[1], '$') !== FALSE)) {
 							$parsedCode .= '<?php echo $this->checkTemplate(' . $includeTemplate . ');?>';
@@ -155,10 +154,10 @@ class Parser {
 						break;
 					//loop
 					case(preg_match($tagMatch['loop'], $html, $matches)):
-					
+
 						//replace the variable in the loop
 						$var = $this->varReplace($matches['variable'], FALSE);
-					
+
 						$this->loopLevel++; // increase the loop counter
 
 						if (preg_match('#\(#', $var)) {
@@ -168,19 +167,19 @@ class Parser {
 							$newvar = $var;
 							$assignNewVar = NULL;
 						}
-						
+
 						//loop variables
-						$counter = "\$counter{$this->loopLevel}";       // count iteration
+						$counter = "\$counter{$this->loopLevel}"; // count iteration
 
 						if (isset($matches['key']) && isset($matches['value'])) {
 							$key = $matches['key'];
 							$value = $matches['value'];
 						} elseif (isset($matches['key'])) {
-							$key = "\$key{$this->loopLevel}";               // key
+							$key = "\$key{$this->loopLevel}";// key
 							$value = $matches['key'];
 						} else {
-							$key = "\$key{$this->loopLevel}";               // key
-							$value = "\$value{$this->loopLevel}";           // value
+							$key = "\$key{$this->loopLevel}"; // key
+							$value = "\$value{$this->loopLevel}"; // value
 						}
 
 						//loop code
@@ -269,17 +268,17 @@ class Parser {
 			$e = new Exception("Error! You need to close the {loop} tag in ".$filePath." template");
 			throw $e->templateFile($filePath);
 		}
-		
+
 		$parsedCode = "<?php if(!class_exists('Rain\Tpl')){exit;}?>" . $parsedCode;
 
 		// fix the php-eating-newline-after-closing-tag-problem
 		#$parsedCode = str_replace("?\>\n", "?\>\n\n", $parsedCode);
-				
+
 		return $parsedCode;
     }
 
-    protected function varReplace($html, $escape = TRUE, $echo = FALSE) {
-
+    protected function varReplace($html, $escape = TRUE, $echo = FALSE) 
+	{
 		// change variable name if loop level
 		$html = preg_replace(['/(\$key)\b/', '/(\$value)\b/', '/(\$counter)\b/'], ['${1}' . $this->loopLevel, '${1}' . $this->loopLevel, '${1}' . $this->loopLevel], $html);
 
@@ -308,19 +307,22 @@ class Parser {
 		return $html;
     }
 
-    protected function modifierReplace($html) {
-		
+    protected function modifierReplace($html)
+	{
+
 		while (strpos($html,'|') !== false && substr($html, strpos($html,'|')+1,1) != "|") {
-			
+
 			preg_match('/([\$a-z_A-Z0-9\(\),\[\]"->]+)\|([\$a-z_A-Z0-9\(\):,\[\]"->]+)/i', $html, $result);
 
-			@list($function, $params) = explode(":", $result[2]);
+			list($function, $params) = explode(":", $result[2]);
 			(!is_null($params)) AND $params = ",".$params;
 
 			$html = str_replace($result[0], $function . "(" . $result[1] . "$params)", $html);
 		}
-		
+
 		return $html;
     }
 
 }
+
+?>

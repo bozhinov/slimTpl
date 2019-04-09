@@ -36,9 +36,10 @@ class Tpl {
         'remove_comments' => false
     ];
 
-	public function configure($my_conf){
+	public function configure($my_conf)
+	{
 		(!is_array($my_conf)) AND die("Invalid config");
-		
+
 		foreach ($my_conf as $my=>$val){
 			if (isset($this->config[$my])){
 				$this->config[$my] = $val;
@@ -54,8 +55,8 @@ class Tpl {
      *
      * @return void, string: depending of the $toString
      */
-    public function draw($filePath, $returnString = FALSE) {
-		
+    public function draw($filePath, $returnString = FALSE)
+	{
         extract($this->vars);
         ob_start();
 
@@ -65,7 +66,7 @@ class Tpl {
 		$filePathCached = $this->config['cache_dir'] . $fileName . ".rtpl.php";
 		$fileTime = (int)@filemtime($filePath);
 		$fileTimeCached = (int)@filemtime($filePathCached);
-		
+
 		// Check if template exists (although there are other reasons for this to be false)
 		if ($fileTime == 0) {
 			die('Template ' . $fileName . ' not found!');
@@ -78,7 +79,7 @@ class Tpl {
 			$html = str_replace("?>\n", "?>\n\n", $html);
 			file_put_contents($filePathCached, $html);
         }
-		
+
 		require $filePathCached;
 		$output = ob_get_clean();
 
@@ -87,7 +88,7 @@ class Tpl {
 		} else {
 			echo $output;
 		}
-        
+
     }
 
     /**
@@ -98,7 +99,8 @@ class Tpl {
      * @param mixed $value value assigned to this variable. Not set if variable_name is an associative array
      *
      */
-    public function assign($variable, $value = null) {
+    public function assign($variable, $value = null)
+	{
         if (is_array($variable)){
             $this->vars = $variable + $this->vars;
         } else {
@@ -107,3 +109,5 @@ class Tpl {
     }
 
 }
+
+?>
