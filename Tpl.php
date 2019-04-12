@@ -108,6 +108,16 @@ class Tpl {
 		}
     }
 
+	public function assign_my_defines()
+	{
+		$defines = get_defined_constants(true);
+		if (isset($defines['user'])){
+			foreach($defines['user'] as $variable => $value){
+				$this->vars[$variable] = $value;
+			}
+		}
+	}
+
 }
 
 ?>
