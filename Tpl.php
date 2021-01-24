@@ -49,7 +49,7 @@ class SlimTpl {
         $fileName = basename($filePath);
 		$filePath = $this->config['tpl_dir'] . $fileName . '.html';
 		$filePathCached = $this->config['cache_dir'] . $fileName . ".rtpl.php";
-		$fileTime = (int)@filemtime($filePath);
+		$fileTime = (int)filemtime($filePath);
 		$fileTimeCached = (int)@filemtime($filePathCached);
 
 		// Check if template exists (although there are other reasons for this to be false)
