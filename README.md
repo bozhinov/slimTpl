@@ -3,7 +3,7 @@ SlimTpl is a fork of RainTpl3 template engine
 
 Here is the full change log:
 
-- Only supported on PHP 7+
+- Only supported on PHP 7.2+
 - Simplified config 
 - Removed plugins
 - Removed blacklist
