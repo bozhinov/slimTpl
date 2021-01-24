@@ -9,16 +9,15 @@
 
 class SlimTpl {
 
-	// variables
 	public $vars = [];
 
-	// configuration
 	protected $config = [
 		'charset' => 'UTF-8',
 		'tpl_dir' => 'templates/',
 		'cache_dir' => 'cache/',
 		'auto_escape' => true,
-		'remove_comments' => false
+		'remove_comments' => false,
+		'production_ready' => false
 	];
 
 	public function configure($my_conf)
@@ -45,24 +44,27 @@ class SlimTpl {
 		extract($this->vars);
 		ob_start();
 
-		// set paths
 		$fileName = basename($filePath);
-		$filePath = $this->config['tpl_dir'] . $fileName . '.html';
 		$filePathCached = $this->config['cache_dir'] . $fileName . ".rtpl.php";
-		$fileTime = (int)filemtime($filePath);
-		$fileTimeCached = (int)@filemtime($filePathCached);
 
-		// Check if template exists (although there are other reasons for this to be false)
-		if ($fileTime == 0) {
-			die('Template ' . $fileName . ' not found!');
-		}
+		if (!$this->config['production_ready']){ # in case all is already cached
+			// set paths
+			$filePath = $this->config['tpl_dir'] . $fileName . '.html';
+			$fileTime = (int)filemtime($filePath);
+			$fileTimeCached = (int)filemtime($filePathCached);
 
-		// Compile the template if the original has been updated 
-		if ($fileTimeCached == 0 || $fileTimeCached < $fileTime) {
-			require_once("Parser.php");
-			$html = (new Parser($this->config))->compileFile($filePath);
-			$html = str_replace("?>\n", "?>\n\n", $html);
-			file_put_contents($filePathCached, $html);
+			// Check if template exists (although there are other reasons for this to be false)
+			if ($fileTime == 0) {
+				die('Template ' . $fileName . ' not found!');
+			}
+
+			// Compile the template if the original has been updated 
+			if ($fileTimeCached == 0 || $fileTimeCached < $fileTime) {
+				require_once("Parser.php");
+				$html = (new Parser($this->config))->compileFile($filePath);
+				$html = str_replace("?>\n", "?>\n\n", $html);
+				file_put_contents($filePathCached, $html);
+			}
 		}
 
 		require $filePathCached;
@@ -73,12 +75,11 @@ class SlimTpl {
 		} else {
 			echo $output;
 		}
-
 	}
 
 	/**
 	* Assign variable
-	* eg.     $t->assign('name','mickey');
+	* eg. $t->assign('name','mickey');
 	*
 	* @param mixed $variable Name of template variable or associative array name/value
 	* @param mixed $value value assigned to this variable. Not set if variable_name is an associative array
