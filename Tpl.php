@@ -35,9 +35,9 @@ class SlimTpl {
 	* Draw the template
 	*
 	* @param string $filePath: name of the template file
-	* @param bool $toString: if the method should return a string or echo the output
+	* @param bool $returnString: if the method should return a string or echo the output
 	*
-	* @return void, string: depending of the $toString
+	* @return void, string: depending of the $returnString
 	*/
 	public function draw($filePath, $returnString = FALSE)
 	{
@@ -77,15 +77,7 @@ class SlimTpl {
 		}
 	}
 
-	/**
-	* Assign variable
-	* eg. $t->assign('name','mickey');
-	*
-	* @param mixed $variable Name of template variable or associative array name/value
-	* @param mixed $value value assigned to this variable. Not set if variable_name is an associative array
-	*
-	*/
-	public function assign($variable, $value = null)
+	public function assign($variable, $value)
 	{
 		if (is_array($variable)){
 			$this->vars = $variable + $this->vars;
