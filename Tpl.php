@@ -45,7 +45,7 @@ class SlimTpl {
 		ob_start();
 
 		$fileName = basename($filePath);
-		$filePathCached = $this->config['cache_dir'] . $fileName . ".rtpl.php";
+		$filePathCached = $this->config['cache_dir'] . $fileName . ".stpl.php";
 
 		if (!$this->config['production_ready']){ # in case all is already cached
 			// set paths
