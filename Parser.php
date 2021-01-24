@@ -13,7 +13,7 @@ class Parser {
 	private $loopLevel = 0;
 
 	// tags natively supported
-	protected static $tags = array(
+	private $tags = array(
 		'loop' => [
 			'({loop.*?})',
 			'/{loop="(?<variable>\${0,1}[^"]*)"(?: as (?<key>\$.*?)(?: => (?<value>\$.*?)){0,1}){0,1}}/'
@@ -69,7 +69,7 @@ class Parser {
 		$tagSplit = [];
 		$tagMatch = [];
 
-		foreach (static::$tags as $tag => $tagArray) {
+		foreach ($this->tags as $tag => $tagArray) {
 			$tagSplit[$tag] = $tagArray[0];
 			$tagMatch[$tag] = $tagArray[1];
 		}
@@ -85,7 +85,9 @@ class Parser {
 		unset($code); // we don't need it any longer
 
 		//variables initialization
-		$parsedCode = $commentIsOpen = $ignoreIsOpen = $auto_escape_old = NULL;
+		$parsedCode = '';
+		$commentIsOpen = $ignoreIsOpen = false;
+		$auto_escape_global = $this->config['auto_escape'];
 		$openIf = 0;
 
 		// if the template is not empty
@@ -97,14 +99,14 @@ class Parser {
 				switch(true){
 					//close ignore tag
 					case (!$commentIsOpen && preg_match($tagMatch['ignore_close'], $html)):
-						$ignoreIsOpen = FALSE;
+						$ignoreIsOpen = false;
 						break;
 					//code between tag ignore id deleted
 					case ($ignoreIsOpen):
 						break;
 					//close no parse tag
 					case (preg_match($tagMatch['noparse_close'], $html)):
-						$commentIsOpen = FALSE;
+						$commentIsOpen = false;
 						break;
 					//code between tag noparse is not compiled
 					case ($commentIsOpen):
@@ -112,11 +114,11 @@ class Parser {
 						break;
 					//ignore
 					case (preg_match($tagMatch['ignore'], $html)):
-						$ignoreIsOpen = TRUE;
+						$ignoreIsOpen = true;
 						break;
 					//noparse
 					case (preg_match($tagMatch['noparse'], $html)):
-						$commentIsOpen = TRUE;
+						$commentIsOpen = true;
 						break;
 					 //include tag
 					case (preg_match($tagMatch['include'], $html, $matches)):
@@ -130,7 +132,7 @@ class Parser {
 						$includeTemplate = $this->varReplace($matches[1]);
 
 						//dynamic include
-						if ((strpos($matches[1], '$') !== FALSE)) {
+						if ((strpos($matches[1], '$') !== false)) {
 							$parsedCode .= '<?php echo $this->checkTemplate(' . $includeTemplate . ');?>';
 						} else {
 							$parsedCode .= '<?php echo $this->checkTemplate("' . $includeTemplate . '");?>';
@@ -140,7 +142,7 @@ class Parser {
 					case(preg_match($tagMatch['loop'], $html, $matches)):
 
 						//replace the variable in the loop
-						$var = $this->varReplace($matches['variable'], FALSE);
+						$var = $this->varReplace($matches['variable'], false);
 
 						$this->loopLevel++; // increase the loop counter
 
@@ -167,11 +169,7 @@ class Parser {
 						}
 
 						//loop code
-						if (PHP_VERSION_ID > 70099) { # is_iterable avail since 7.1
-							$parsedCode .= "<?php $counter=-1; $assignNewVar if(is_iterable($newvar) && count($newvar)) foreach( $newvar as $key => $value ){ $counter++; ?>";
-						} else {
-							$parsedCode .= "<?php $counter=-1; $assignNewVar if((is_array($newvar) || $newvar instanceof Traversable) && count($newvar)) foreach( $newvar as $key => $value ){ $counter++; ?>";
-						}
+						$parsedCode .= "<?php $counter=-1; $assignNewVar if(is_iterable($newvar) && count($newvar)) foreach( $newvar as $key => $value ){ $counter++; ?>";
 						break;
 					//close loop tag
 					case (preg_match($tagMatch['loop_close'], $html)):
@@ -191,13 +189,13 @@ class Parser {
 					case (preg_match($tagMatch['if'], $html, $matches)):
 						$openIf++; //increase open if counter (for intendation)
 						//variable substitution into condition (no delimiter into the condition)
-						$parsedCondition = $this->varReplace($matches[1], FALSE);
+						$parsedCondition = $this->varReplace($matches[1], false);
 						$parsedCode .= "<?php if( $parsedCondition ){ ?>"; //if code
 						break;
 					//elseif
 					case (preg_match($tagMatch['elseif'], $html, $matches)):
 						//variable substitution into condition (no delimiter into the condition)
-						$parsedCondition = $this->varReplace($matches[1], FALSE);
+						$parsedCondition = $this->varReplace($matches[1], false);
 						$parsedCode .= "<?php }elseif( $parsedCondition ){ ?>"; //elseif code
 						break;
 					//else
@@ -212,20 +210,19 @@ class Parser {
 					//variables
 					case (preg_match($tagMatch['variable'], $html, $matches)):
 						//variables substitution (es. {$title})
-						$parsedCode .= "<?php " . $this->varReplace($matches[1], TRUE, TRUE) . "; ?>";
+						$parsedCode .= "<?php " . $this->varReplace($matches[1], true, true) . "; ?>";
 						break;
 					// autoescape off
 					case (preg_match($tagMatch['autoescape'], $html, $matches)):
-						$auto_escape_old = $this->config['auto_escape'];
-						$this->config['auto_escape'] = (in_array($matches[1], array('off','false','0', NULL))) ? FALSE : TRUE;
+						$this->config['auto_escape'] = (in_array($matches[1], ['off','false'])) ? false : true;
 						break;
 					// autoescape on
 					case (preg_match($tagMatch['autoescape_close'], $html, $matches)):
-						$this->config['auto_escape'] = $auto_escape_old;
+						$this->config['auto_escape'] = $auto_escape_global;
 						break;
 					// function
 					case (preg_match($tagMatch['function'], $html, $matches)):
-						$parsedCode .= "<?php echo ".$matches[1] . (isset($matches[2]) ? $this->varReplace($matches[2], FALSE) : "()")."; ?>"; // function
+						$parsedCode .= "<?php echo ".$matches[1] . (isset($matches[2]) ? $this->varReplace($matches[2], false) : "()")."; ?>"; // function
 						break;
 					//ternary
 					case (preg_match($tagMatch['ternary'], $html, $matches)):
@@ -259,7 +256,7 @@ class Parser {
 		return $parsedCode;
 	}
 
-	protected function varReplace($html, $escape = TRUE, $echo = FALSE) 
+	protected function varReplace($html, $escape = true, $echo = false) 
 	{
 		// change variable name if loop level
 		$html = preg_replace(['/(\$key)\b/', '/(\$value)\b/', '/(\$counter)\b/'], ['${1}' . $this->loopLevel, '${1}' . $this->loopLevel, '${1}' . $this->loopLevel], $html);
@@ -291,7 +288,6 @@ class Parser {
 
 	protected function modifierReplace($html)
 	{
-
 		while (strpos($html,'|') !== false && substr($html, strpos($html,'|')+1,1) != "|") {
 
 			preg_match('/([\$a-z_A-Z0-9\(\),\[\]"->]+)\|([\$a-z_A-Z0-9\(\):,\[\]"->]+)/i', $html, $result);
