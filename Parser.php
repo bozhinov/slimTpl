@@ -1,11 +1,11 @@
 <?php
 
 /**
- *  SlimTPL 1.0 - a RainTpl fork
- *  --------
- *  maintained by Momchil Bozhinov (momchil@bojinov.info)
- *  ------------
- */
+*  SlimTPL 1.0 - a RainTpl fork
+*  --------
+*  maintained by Momchil Bozhinov (momchil@bojinov.info)
+*  ------------
+*/
 
 class Parser {
 
@@ -257,9 +257,9 @@ class Parser {
 		#$parsedCode = str_replace("?\>\n", "?\>\n\n", $parsedCode);
 
 		return $parsedCode;
-    }
+	}
 
-    protected function varReplace($html, $escape = TRUE, $echo = FALSE) 
+	protected function varReplace($html, $escape = TRUE, $echo = FALSE) 
 	{
 		// change variable name if loop level
 		$html = preg_replace(['/(\$key)\b/', '/(\$value)\b/', '/(\$counter)\b/'], ['${1}' . $this->loopLevel, '${1}' . $this->loopLevel, '${1}' . $this->loopLevel], $html);
@@ -287,9 +287,9 @@ class Parser {
 		}
 
 		return $html;
-    }
+	}
 
-    protected function modifierReplace($html)
+	protected function modifierReplace($html)
 	{
 
 		while (strpos($html,'|') !== false && substr($html, strpos($html,'|')+1,1) != "|") {
@@ -303,7 +303,7 @@ class Parser {
 		}
 
 		return $html;
-    }
+	}
 
 }
 
