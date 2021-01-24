@@ -1,4 +1,4 @@
-Slim mod for the RainTpl3 template engine (unofficial)
+SlimTpl is a fork of RainTpl3 template engine
 ===================
 
 Here is the full change log:
