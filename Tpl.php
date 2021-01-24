@@ -1,28 +1,13 @@
 <?php
 
 /**
- *  RainTPL
+ *  SlimTPL 1.0 - a RainTpl fork
  *  --------
- *  Realized by Federico Ulfo & maintained by the Rain Team
- *  Distributed under GNU/LGPL 3 License
- *
- *  @version 3.0 Alpha milestone: https://github.com/rainphp/raintpl3/issues/milestones?with_issues=no
- *
- *  mod_Slim 1.0 (unofficial)
  *  maintained by Momchil Bozhinov (momchil@bojinov.info)
  *  ------------
- *  - Removed plugins
- *  - Removed blacklist
- *  - Removed the option for extra tags
- *  - Removed SyntaxException
- *  - Removed autoload, replaced with a simple class include
- *  - Simplified config (see examples for usage)
- *  - Parser code somewhat reorganized
  */
 
-namespace Rain;
-
-class Tpl {
+class SlimTpl {
 
     // variables
     public $vars = [];

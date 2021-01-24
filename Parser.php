@@ -1,30 +1,14 @@
 <?php
 
 /**
- *  RainTPL
+ *  SlimTPL 1.0 - a RainTpl fork
  *  --------
- *  Realized by Federico Ulfo & maintained by the Rain Team
- *  Distributed under GNU/LGPL 3 License
- *
- *  @version 3.0 Alpha milestone: https://github.com/rainphp/raintpl3/issues/milestones?with_issues=no
- *
- *  mod_Slim 1.0 (unofficial)
  *  maintained by Momchil Bozhinov (momchil@bojinov.info)
  *  ------------
- *  - Removed plugins
- *  - Removed blacklist
- *  - Removed the option for extra tags
- *  - Removed SyntaxException
- *  - Removed autoload, replaced with a simple class include
- *  - Simplified config (see examples for usage)
- *  - Parser code somewhat reorganized
  */
-
-namespace Rain;
 
 class Parser {
 
-	// variables
 	private $config;
 	private $loopLevel = 0;
 
@@ -249,8 +233,6 @@ class Parser {
 						break;
 					//constants
 					case (preg_match($tagMatch['constant'], $html, $matches)):
-						//$parsedCode .= "<?php echo " . $this->conReplace($matches[1], $this->loopLevel) . "; 
-						//Issue recorded as: https://github.com/rainphp/raintpl3/issues/178
 						$parsedCode .= "<?php " . $this->modifierReplace($matches[1]) . "; ?>";
 						break;
 					default:
@@ -269,7 +251,7 @@ class Parser {
 			throw $e->templateFile($filePath);
 		}
 
-		$parsedCode = "<?php if(!class_exists('Rain\Tpl')){exit;}?>" . $parsedCode;
+		$parsedCode = "<?php if(!class_exists('SlimTpl')){exit;}?>" . $parsedCode;
 
 		// fix the php-eating-newline-after-closing-tag-problem
 		#$parsedCode = str_replace("?\>\n", "?\>\n\n", $parsedCode);
