@@ -50,8 +50,9 @@ class SlimTpl {
 		if (!$this->config['production_ready']){ # in case all is already cached
 			// set paths
 			$filePath = $this->config['tpl_dir'] . $fileName . '.html';
-			$fileTime = (int)filemtime($filePath);
-			$fileTimeCached = (int)filemtime($filePathCached);
+			// The results of this function are cached
+			$fileTime = (int)@filemtime($filePath);
+			$fileTimeCached = (int)@filemtime($filePathCached);
 
 			// Check if template exists (although there are other reasons for this to be false)
 			if ($fileTime == 0) {
