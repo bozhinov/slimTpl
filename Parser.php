@@ -78,8 +78,7 @@ class Parser {
 
 		//split the code with the tags regexp
 		$codeSplit = preg_split("/" . implode("|", $tagSplit) . "/", $code, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
-		if ($codeSplit == false)
-		{
+		if ($codeSplit == false){
 			// no parsing required
 			return $code;
 		}
