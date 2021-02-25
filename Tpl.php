@@ -64,7 +64,10 @@ class SlimTpl {
 				require_once("Parser.php");
 				$html = (new Parser($this->config))->compileFile($filePath);
 				$html = str_replace("?>\n", "?>\n\n", $html);
-				file_put_contents($filePathCached, $html);
+				$ok = file_put_contents($filePathCached, $html);
+				if ($ok === false) {
+					die("Cache is not writable");
+				}
 			}
 		}
 
