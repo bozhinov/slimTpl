@@ -81,7 +81,7 @@ class SlimTpl {
 		}
 	}
 
-	public function assign($variable, $value)
+	public function assign($variable, $value = null)
 	{
 		if (is_array($variable)){
 			$this->vars = $variable + $this->vars;
