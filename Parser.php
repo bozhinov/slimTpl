@@ -283,8 +283,13 @@ class Parser {
 
 			preg_match('/([\$a-z_A-Z0-9\(\),\[\]"->]+)\|([\$a-z_A-Z0-9\(\):,\[\]"->]+)/i', $html, $result);
 
-			list($function, $params) = explode(":", $result[2]);
-			(!is_null($params)) AND $params = ",".$params;
+			$str = explode(":", $result[2]);
+			$function = $str[0];
+			if (count($str) == 2){
+				$params = ",".$str[1];
+			} else {
+				$params = "";
+			}
 
 			$html = str_replace($result[0], $function . "(" . $result[1] . "$params)", $html);
 		}
