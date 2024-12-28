@@ -81,6 +81,11 @@ class SlimTpl {
 		}
 	}
 
+	public function draw_clean($filePath)
+	{
+		include $this->config['tpl_dir'] . $filePath . '.html';
+	}
+
 	public function assign($variable, $value = null)
 	{
 		if (is_array($variable)){
