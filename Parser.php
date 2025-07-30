@@ -208,7 +208,7 @@ class Parser {
 				//variables
 				case (preg_match($tagMatch['variable'], $html, $matches)):
 					//variables substitution (es. {$title})
-					$parsedCode .= "<?php " . $this->varReplace($matches[1], true, true) . "; ?>";
+					$parsedCode .= "<?php echo " . $this->varReplace($matches[1], true) . "; ?>";
 					break;
 				// autoescape off
 				case (preg_match($tagMatch['autoescape'], $html, $matches)):
@@ -247,7 +247,7 @@ class Parser {
 		return "<?php if(!class_exists('SlimTpl')){exit;}?>" . $parsedCode;
 	}
 
-	protected function varReplace($html, $escape = true, $echo = false) 
+	protected function varReplace($html, $escape = true) 
 	{
 		// change variable name if loop level
 		$html = preg_replace(['/(\$key)\b/', '/(\$value)\b/', '/(\$counter)\b/'], ['${1}' . $this->loopLevel, '${1}' . $this->loopLevel, '${1}' . $this->loopLevel], $html);
@@ -267,10 +267,8 @@ class Parser {
 
 			// if does not initialize a value, e.g. {$a = 1}
 			if (!preg_match('/\$.*=.*/', $html)) {
-
 				// escape character
 				($this->config['auto_escape'] && $escape) AND $html = "htmlspecialchars($html, ENT_COMPAT, '" . $this->config['charset'] . "', FALSE)";
-				($echo) AND $html = "echo ".$html;
 			}
 		}
 
