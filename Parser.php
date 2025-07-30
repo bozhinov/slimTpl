@@ -3,7 +3,7 @@
 /**
 *  SlimTPL 1.0 - a RainTpl fork
 *  --------
-*  maintained by Momchil Bozhinov (momchil@bojinov.info)
+*  maintained by Momchil Bozhinov (momchil@bozhinov.eu)
 */
 
 class Parser {
