@@ -30,7 +30,6 @@ class Parser {
 		'noparse_close' => ['({\/noparse})', '/{\/noparse}/'],
 		'ignore' => ['({ignore}|{\*)', '/{ignore}|{\*/'],
 		'ignore_close' => ['({\/ignore}|\*})', '/{\/ignore}|\*}/'],
-		'include' => ['({include.*?})', '/{include="([^"]*)"}/'],
 		'function' =>[
 			'({function.*?})',
 			'/{function="([a-zA-Z_][a-zA-Z_0-9\:]*)(\(.*\)){0,1}"}/'
