@@ -118,24 +118,6 @@ class Parser {
 				case (preg_match($tagMatch['noparse'], $html)):
 					$commentIsOpen = true;
 					break;
-				 //include tag
-				case (preg_match($tagMatch['include'], $html, $matches)):
-
-					// reduce the path
-					$matches[1] = preg_replace(array("#(://(*SKIP)(*FAIL))|(/{2,})#", "#(/\./+)#", "#\\\#"), array("/", "/","\\\\\\"), $matches[1]);
-					while(preg_match('#\w+\.\./#', $matches[1])) {
-						$matches[1] = preg_replace('#\w+/\.\./#', '', $matches[1]);
-					}
-					// parse
-					$includeTemplate = $this->varReplace($matches[1]);
-
-					//dynamic include
-					if ((strpos($matches[1], '$') !== false)) {
-						$parsedCode .= '<?php echo $this->checkTemplate(' . $includeTemplate . ');?>';
-					} else {
-						$parsedCode .= '<?php echo $this->checkTemplate("' . $includeTemplate . '");?>';
-					}
-					break;
 				//loop
 				case(preg_match($tagMatch['loop'], $html, $matches)):
 
